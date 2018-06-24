@@ -1,0 +1,185 @@
+use Libraries.Game.Game
+use Libraries.Game.Graphics.Drawable
+use Libraries.Sound.Audio
+use Libraries.Game.Graphics.Color
+use Libraries.Interface.Events.KeyboardEvent
+use Libraries.Interface.Events.KeyboardListener
+use Libraries.Game.Graphics.Label
+use Libraries.Game.Graphics.Font
+use Libraries.Sound.Speech
+use Libraries.Compute.Random
+
+class Main is Game, KeyboardListener
+    // Instatiating the Drawable objects for main squares
+    Drawable upperLeft
+    Drawable upperRight
+    Drawable lowerLeft
+    Drawable lowerRight
+
+    // Instantiating Random object
+    Random random
+
+    // Instatiating the Color objects and creating some color fr later use
+    Color color
+    Color red = color:Red()
+    Color navy = color:Navy()
+    Color randomColor
+    Color difColor
+
+    // Instantiating a Font object
+    Font font0
+    Font font1
+
+    // Instantiating a Lable object
+    Label label0
+    Label label1
+
+    //Instatiating a Speech object
+    Speech speech
+
+
+    //Declaring a global integer variable that stores random integer value
+    integer randomRed = 0
+    integer randomGreen = 0
+    integer randomBlue = 0
+
+    // Declaring a global number variable that stores converted number value from the radomInt
+    number redNum = 0
+    number greenNum = 0
+    number blueNum = 0
+
+    // Declaring random integer variable for random button
+    integer randomButton = 0
+
+    // Declaring an iteger variable that is used as a counter
+    integer player1Score = 0
+    integer player2Score = 0
+
+    action Main
+        say "You can press [space] key to listen to the instruction when the game starts."
+        StartGame()
+    end
+
+    action CreateGame
+        //Setting the atributes fo the Font object
+        SettingFonts(font0, "Arial", 23, red)
+        SettingFonts(font1, "Arial", 48, navy)
+
+        // Declaring a local text variable just for the initial screen
+        text intro = "Welcome to the Color-Sound Sleuth! When you press [enter], you will see four squares with a color on the screen. Each square is numbered: upper left square is 1, upper right is 2, lower left is 3 and lower right is 4. The objective of the game is for you to find a square that has a slightly different color tone among the four. Each square is presented not only with color, but also with sound cue. You can listen to the sound cue of each square by pressing the keys: key [A] for square 1, [S] for 2, [Z] for 3 and [X] for 4. The square that has slightly different color tone also has slightly different sound cue compared to the other three. Once determined which square is different from the others, you press key [1], [2], [3] or [4]. Then the game will give you the sound cue for correct and incorrect answer, as well as show both players the current score.  This game is two player-game. Each time a new set of the squares is presented, the sound cue tells you which player should play that turn; The left speaker will sound for Player 1, and the right speaker will play for the player 2. After each player played five times, a chime will ring to tell the game is finished. At that time, the result of the competition will be displayed on the screen. Throughout the game [space] key is available to have computer speak the text display out loud. Press [enter] to start the game!"
+
+        // Creating the Label for the initial instruction screen
+        label0:SetFont(font0)
+        label0:SetWidth(700)
+        label0:SetPosition(50, 580)
+        label0:SetText(intro)
+        label0:SetDescription(intro)
+        Add(label0)
+        label0:Show()
+
+        // Calling the action that update the visual label display
+        DisplayUpdate()
+        label1:Hide()
+
+        AddKeyboardListener(me)
+    end
+
+    action Update(number seconds)
+
+    end
+
+    action PressedKey(KeyboardEvent event)
+
+        if event:keyCode = event:ENTER
+            label0:Hide()
+            label1:Show()
+            // Calling the action that sets new set of squares on the screen
+            SettingNewSetOfSquares()
+
+        elseif event:keyCode = event:SPACE
+            if label0:IsShowing()
+                speech:Say(label0:GetDescription())
+            elseif label1:IsShowing()
+                speech:Say(label1:GetDescription())
+            end
+        elseif event:keyCode = event:ESCAPE
+            Exit()
+        end
+    end
+
+// ***** Creating Actions for managing complexity *****
+
+    // Action that sets different font to different each font object
+    action SettingFonts(Font object, text style, integer size, Color color)
+        object:LoadFont(style)
+        object:SetSize(size)
+        object:SetColor(color)
+    end
+
+    // Action that generate random color for the squares
+    action GenerateColors
+        randomRed = random:RandomIntegerBetween(0, 90)
+        randomGreen = random:RandomIntegerBetween(0, 90)
+        randomBlue = random:RandomIntegerBetween(0, 90)
+        redNum = cast(number, randomRed) / 100
+        greenNum = cast(number, randomGreen) / 100
+        blueNum = cast(number, randomBlue) / 100
+        randomColor:SetColor(redNum, greenNum, blueNum, 1)
+    end
+
+    // Action to place squares on to the screen
+    action LoadSquareAndPosition(Drawable object, integer width, integer height, Color color, integer xPosition, integer yPosition)
+        object:LoadFilledRectangle(width, height, color)
+        object:SetPosition(xPosition, yPosition)
+        Add(object)
+    end
+
+    action LoadOneSquareWithDifColor
+        randomButton = random:RandomIntegerBetween(1, 4)
+            if randomButton = 1
+                LoadSquareAndPosition(upperLeft, 100, 100, difColor, 100, 400)
+                LoadSquareAndPosition(upperRight, 100, 100, randomColor, 300, 400)
+                LoadSquareAndPosition(lowerLeft, 100, 100, randomColor, 100, 100)
+                LoadSquareAndPosition(lowerRight, 100, 100, randomColor, 300, 100)
+            elseif randomButton = 2
+                LoadSquareAndPosition(upperLeft, 100, 100, randomColor, 100, 400)
+                LoadSquareAndPosition(upperRight, 100, 100, difColor, 300, 400)
+                LoadSquareAndPosition(lowerLeft, 100, 100, randomColor, 100, 100)
+                LoadSquareAndPosition(lowerRight, 100, 100, randomColor, 300, 100)
+            elseif randomButton = 3
+                LoadSquareAndPosition(upperLeft, 100, 100, randomColor, 100, 400)
+                LoadSquareAndPosition(upperRight, 100, 100, randomColor, 300, 400)
+                LoadSquareAndPosition(lowerLeft, 100, 100, difColor, 100, 100)
+                LoadSquareAndPosition(lowerRight, 100, 100, randomColor, 300, 100)
+            elseif randomButton = 4
+                LoadSquareAndPosition(upperLeft, 100, 100, randomColor, 100, 400)
+                LoadSquareAndPosition(upperRight, 100, 100, randomColor, 300, 400)
+                LoadSquareAndPosition(lowerLeft, 100, 100, randomColor, 100, 100)
+                LoadSquareAndPosition(lowerRight, 100, 100, difColor, 300, 100)
+            end
+    end
+
+    action SettingNewSetOfSquares
+        // Calling the action that generate the color for the squares
+        GenerateColors()
+
+        // Creating one different color 
+        difColor:SetColor(redNum + 0.1, greenNum + 0.1, blueNum + 0.1, 1)
+
+        /* Loading and addinng the four squares to the screen while making the 
+        color of one square slightly different from the other three. This action
+        includes another action that is made to simply place the four colored 
+        squares to the screen in the first place.*/
+        LoadOneSquareWithDifColor()
+    end
+
+    // Action that updates the visual label display
+    action DisplayUpdate
+        // Setting the attributes to the Label1 object and adding it to the screen
+        label1:SetFont(font1)
+        label1:SetPosition(100, 300)
+        label1:SetText("Player 1: "+player1Score+" vs. Player 2: "+player2Score)
+        label1:SetDescription("Player 1: "+player1Score+" vs. Player 2: "+player2Score)
+        Add(label1)
+    end
+end
